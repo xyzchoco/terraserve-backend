@@ -6,12 +6,17 @@ use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\TransactionController;
 use App\Http\Controllers\API\ProductCategoryController;
+use App\Http\Controllers\API\ForgotPasswordController;
 
 Route::get('products', [ProductController::class, 'all']);
 Route::get('categories', [ProductCategoryController::class, 'all']);
 
 Route::post('register', [UserController::class, 'register']);
 Route::post('login', [UserController::class, 'login']);
+
+Route::post('/forgot-password', [ForgotPasswordController::class, 'forgot']);
+Route::post('/forgot-password', [ForgotPasswordController::class, 'forgot']);
+Route::post('/reset-password', [ForgotPasswordController::class, 'reset']);
 
 Route::middleware('auth:sanctum')->group(function (){
     Route::get('user', [UserController::class, 'fetch']);

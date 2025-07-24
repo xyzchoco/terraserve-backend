@@ -1,1 +1,12 @@
 *.sqlite*
+/vendor
+/node_modules
+.env
+.env.*
+*.log
+*.sqlite
+*.zip
+/public/storage
+/storage/*.key
+/.idea
+.phpunit.result.cache

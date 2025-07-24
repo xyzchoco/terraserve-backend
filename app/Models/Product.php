@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Activitylog\LogOptions;
 
 class Product extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, LogsActivity;
 
        /**
      * The attributes that are mass assignable.
@@ -24,12 +26,20 @@ class Product extends Model
         'tags'
     ];
 
-    public function galleries()
+    public function getActivitylogOptions(): LogOptions
     {
-        return $this->hasMany(ProductGallery::class, 'products_id', 'id');
+        return LogOptions::defaults()
+            ->logOnly(['name', 'price', 'stok']) // Hanya catat perubahan pada kolom ini
+            ->setDescriptionForEvent(fn(string $eventName) => "Produk ini telah di-{$eventName}")
+            ->useLogName('Product');
     }
 
-    public function category()
+    public function galleries()
+    {
+        return $this->hasMany(ProductGallery::class, 'product_id', 'id');
+    }
+
+    public function category()  
     {
         return $this->belongsTo(ProductCategory::class, 'categories_id', 'id');
     }

@@ -21,36 +21,42 @@ class UserController extends Controller
     public function register(Request $request)
     {
         try {
+            // 1. Tambahkan validasi untuk 'phone' dan 'password_confirmation'
             $request->validate([
                 'name' => ['required', 'string', 'max:255'],
-                'username' => ['required', 'string', 'max:255', 'unique:users'],
                 'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-                'password' => ['required', 'string', new Password]
-            ]);
+                'phone' => ['required', 'string', 'max:20'], // Tambahkan ini
+                'password' => ['required', 'string', 'confirmed', new Password], // 'confirmed' akan otomatis cek 'password_confirmation'
+        ]);
 
-            User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'username' => $request->username,
-                'password' => Hash::make($request->password),
-            ]);
+        // 2. Tambahkan 'phone' dan 'roles' saat membuat user
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone, // Tambahkan ini
+            'roles' => 'USER', // Beri nilai default 'USER' untuk registrasi
+            'password' => Hash::make($request->password),
+        ]);
 
-            $user = User::where('email', $request->email)->first();
+        // Kode Anda selanjutnya sudah benar
+        $user = User::where('email', $request->email)->first();
 
-            $tokenResult = $user->createToken('authToken')->plainTextToken;
+        $tokenResult = $user->createToken('authToken')->plainTextToken;
 
-            return ResponseFormatter::success([
-                'access_token' => $tokenResult,
-                'token_type' => 'Bearer',
-                'user' => $user
-            ],'User Registered');
+        return ResponseFormatter::success([
+            'access_token' => $tokenResult,
+            'token_type' => 'Bearer',
+            'user' => $user
+        ], 'User Registered');
+        
         } catch (Exception $error) {
+            // Untuk debugging, Anda bisa menampilkan error aslinya
             return ResponseFormatter::error([
-                'message' => 'Something went wrong',
-                'error' => $error,
-            ],'Authentication Failed', 500);
-        }
+            'message' => 'Something went wrong',
+            'error' => $error->getMessage(), // Tampilkan pesan error yang lebih jelas
+        ], 'Authentication Failed', 500);
     }
+}
 
     public function login(Request $request)
     {
