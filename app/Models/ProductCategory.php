@@ -17,8 +17,12 @@ class ProductCategory extends Model
      *
      * @var array
      */
+
+    protected $table = 'product_categories';
+
     protected $fillable = [
-        'name'
+        'name',
+        'icon_url'
     ];
 
     public function getActivitylogOptions(): LogOptions

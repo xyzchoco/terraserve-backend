@@ -26,6 +26,10 @@ class Product extends Model
         'tags'
     ];
 
+    protected $casts = [
+        'tags' => 'array', // <-- TAMBAHKAN BARIS INI
+    ];
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()

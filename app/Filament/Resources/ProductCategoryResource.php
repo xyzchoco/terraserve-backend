@@ -4,12 +4,14 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductCategoryResource\Pages;
 use App\Models\ProductCategory;
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ImageColumn;
 
 class ProductCategoryResource extends Resource
 {
@@ -17,17 +19,25 @@ class ProductCategoryResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-tag';
 
-    protected static ?string $navigationGroup = 'Manajemen Produk'; // Mengelompokkan menu
+    protected static ?string $navigationGroup = 'Manajemen Produk';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                // Field ini sesuai dengan 'name' di $fillable Anda
-                Forms\Components\TextInput::make('name')
+                TextInput::make('name')
                     ->label('Nama Kategori')
                     ->required()
                     ->maxLength(255),
+                
+                // TAMBAHKAN INI UNTUK UPLOAD GAMBAR
+                FileUpload::make('icon_url')
+                    ->label('Ikon Kategori')
+                    ->image() // Menandakan ini adalah input gambar
+                    ->disk('public') // Menyimpan ke disk 'public'
+                    ->directory('category_icons') // Menyimpan di dalam folder storage/app/public/category_icons
+                    ->visibility('public')
+                    ->columnSpanFull(), // Membuat field mengambil lebar penuh
             ]);
     }
 
@@ -35,15 +45,19 @@ class ProductCategoryResource extends Resource
     {
         return $table
             ->columns([
-                // Kolom ini sesuai dengan 'name' di database Anda
-                Tables\Columns\TextColumn::make('name')
+                // TAMBAHKAN INI UNTUK MENAMPILKAN GAMBAR
+                ImageColumn::make('icon_url')
+                    ->label('Ikon')
+                    ->disk('public') // Mengambil gambar dari disk 'public'
+                    ->circular(), // Menampilkan gambar dalam bentuk lingkaran
+
+                TextColumn::make('name')
                     ->label('Nama Kategori')
                     ->searchable()
                     ->sortable(),
 
-                // BONUS: Menampilkan jumlah produk di setiap kategori
-                Tables\Columns\TextColumn::make('products_count')
-                    ->counts('products') // Menghitung dari relasi 'products'
+                TextColumn::make('products_count')
+                    ->counts('products')
                     ->label('Jumlah Produk')
                     ->sortable(),
             ])

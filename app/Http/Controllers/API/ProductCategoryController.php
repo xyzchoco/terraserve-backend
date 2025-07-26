@@ -9,41 +9,39 @@ use App\Http\Controllers\Controller;
 
 class ProductCategoryController extends Controller
 {
+    /**
+     * Mengambil semua data kategori untuk ditampilkan di aplikasi.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function all(Request $request)
     {
-        $id = $request->input('id');
-        $limit = $request->input('limit', 6);
-        $name = $request->input('name');
-        $show_product = $request->input('show_product');
+        try {
+            // 1. Ambil semua kategori dari database
+            $categories = ProductCategory::all();
 
-        if($id)
-        {
-            $category = ProductCategory::with(['products'])->find($id);
+            // 2. PENTING: Ubah path ikon menjadi URL lengkap
+            $categories->transform(function ($category) {
+                if ($category->icon_url) {
+                    // Fungsi url() akan menggunakan APP_URL dari file .env Anda
+                    $category->icon_url = url('storage/' . $category->icon_url);
+                }
+                return $category;
+            });
 
-            if($category)
-                return ResponseFormatter::success(
-                    $category,
-                    'Data produk berhasil diambil'
-                );
-            else
-                return ResponseFormatter::error(
-                    null,
-                    'Data kategori produk tidak ada',
-                    404
-                );
+            // 3. Kembalikan data dalam format yang sederhana
+            return ResponseFormatter::success(
+                $categories,
+                'Data list kategori produk berhasil diambil'
+            );
+
+        } catch (\Exception $e) {
+            return ResponseFormatter::error(
+                null,
+                'Gagal mengambil data kategori: ' . $e->getMessage(),
+                500
+            );
         }
-
-        $category = ProductCategory::query();
-
-        if($name)
-            $category->where('name', 'like', '%' . $name . '%');
-
-        if($show_product)
-            $category->with('products');
-
-        return ResponseFormatter::success(
-            $category->paginate($limit),
-            'Data list kategori produk berhasil diambil'
-        );
     }
 }
