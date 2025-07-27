@@ -17,16 +17,20 @@ class ProductCategoryController extends Controller
      */
     public function all(Request $request)
     {
-        $categories = ProductCategory::all();
+        // Eager load relasi subCategories
+        $categories = ProductCategory::with('subCategories')->get();
 
-        // Ubah kedua path menjadi URL lengkap
+        // Ubah path menjadi URL lengkap untuk induk dan semua anaknya
         $categories->transform(function ($category) {
             if ($category->icon_url) {
                 $category->icon_url = url('storage/' . $category->icon_url);
             }
-            if ($category->image_url) {
-                $category->image_url = url('storage/' . $category->image_url);
-            }
+            $category->subCategories->transform(function ($subCategory) {
+                if ($subCategory->image_url) {
+                    $subCategory->image_url = url('storage/' . $subCategory->image_url);
+                }
+                return $subCategory;
+            });
             return $category;
         });
 

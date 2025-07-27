@@ -2,16 +2,17 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ProductCategoryResource\Pages;
-use App\Models\ProductCategory;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\FileUpload;
+use App\Models\ProductCategory;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Repeater;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Forms\Components\FileUpload;
+use App\Filament\Resources\ProductCategoryResource\Pages;
 
 class ProductCategoryResource extends Resource
 {
@@ -25,22 +26,28 @@ class ProductCategoryResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')->label('Nama Kategori')->required(),
-                
+                TextInput::make('name')
+                    ->label('Nama Kategori Induk (Untuk Dashboard)')
+                    ->required(),
                 FileUpload::make('icon_url')
                     ->label('Ikon Kategori (Untuk Dashboard)')
-                    ->image()
-                    ->disk('public')
-                    ->directory('category_icons')
+                    ->image()->disk('public')->directory('category_icons')
                     ->required(fn (string $context): bool => $context === 'create'),
-
-                // --- TAMBAHKAN FIELD INI ---
-                FileUpload::make('image_url')
-                    ->label('Gambar Kategori (Untuk Halaman Kategori)')
-                    ->image()
-                    ->disk('public')
-                    ->directory('category_images') // Simpan di folder terpisah
-                    ->required(fn (string $context): bool => $context === 'create'),
+                
+                Repeater::make('subCategories')
+                    ->label('Subkategori (Untuk Halaman "Semua Kategori")')
+                    ->relationship() // Menghubungkan ke relasi 'subCategories' di model
+                    ->schema([
+                        TextInput::make('name')
+                            ->label('Nama Subkategori')
+                            ->required(),
+                        FileUpload::make('image_url')
+                            ->label('Gambar Subkategori')
+                            ->image()->disk('public')->directory('subcategory_images')
+                            ->required(),
+                    ])
+                    ->columnSpanFull()
+                    ->helperText('Jika tidak ada subkategori, maka kategori induk ini yang akan tampil.'),
             ]);
     }
 
