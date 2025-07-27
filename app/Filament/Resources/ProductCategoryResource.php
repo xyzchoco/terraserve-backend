@@ -25,55 +25,43 @@ class ProductCategoryResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')
-                    ->label('Nama Kategori')
-                    ->required()
-                    ->maxLength(255),
+                TextInput::make('name')->label('Nama Kategori')->required(),
                 
-                // TAMBAHKAN INI UNTUK UPLOAD GAMBAR
                 FileUpload::make('icon_url')
-                    ->label('Ikon Kategori')
-                    ->image() // Menandakan ini adalah input gambar
-                    ->disk('public') // Menyimpan ke disk 'public'
-                    ->directory('category_icons') // Menyimpan di dalam folder storage/app/public/category_icons
-                    ->visibility('public')
-                    ->columnSpanFull(), // Membuat field mengambil lebar penuh
+                    ->label('Ikon Kategori (Untuk Dashboard)')
+                    ->image()
+                    ->disk('public')
+                    ->directory('category_icons')
+                    ->required(fn (string $context): bool => $context === 'create'),
+
+                // --- TAMBAHKAN FIELD INI ---
+                FileUpload::make('image_url')
+                    ->label('Gambar Kategori (Untuk Halaman Kategori)')
+                    ->image()
+                    ->disk('public')
+                    ->directory('category_images') // Simpan di folder terpisah
+                    ->required(fn (string $context): bool => $context === 'create'),
             ]);
     }
 
+
+    
     public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                // TAMBAHKAN INI UNTUK MENAMPILKAN GAMBAR
-                ImageColumn::make('icon_url')
-                    ->label('Ikon')
-                    ->disk('public') // Mengambil gambar dari disk 'public'
-                    ->circular(), // Menampilkan gambar dalam bentuk lingkaran
+        {
+            return $table
+                ->columns([
+                    ImageColumn::make('icon_url')->label('Ikon')->disk('public')->circular(),
+                    
+                    // --- TAMBAHKAN KOLOM INI ---
+                    ImageColumn::make('image_url')->label('Gambar')->disk('public'),
 
-                TextColumn::make('name')
-                    ->label('Nama Kategori')
-                    ->searchable()
-                    ->sortable(),
+                    TextColumn::make('name')->label('Nama Kategori')->searchable(),
+                    TextColumn::make('products_count')->counts('products')->label('Jumlah Produk'),
+                ])
+                // ... sisa kode
+                ;
+        }
 
-                TextColumn::make('products_count')
-                    ->counts('products')
-                    ->label('Jumlah Produk')
-                    ->sortable(),
-            ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
-    }
     
     public static function getPages(): array
     {

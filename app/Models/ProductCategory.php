@@ -20,9 +20,10 @@ class ProductCategory extends Model
 
     protected $table = 'product_categories';
 
-    protected $fillable = [
+   protected $fillable = [
         'name',
-        'icon_url'
+        'icon_url',
+        'image_url', // <-- Tambahkan ini
     ];
 
     public function getActivitylogOptions(): LogOptions

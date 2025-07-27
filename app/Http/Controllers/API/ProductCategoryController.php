@@ -17,31 +17,23 @@ class ProductCategoryController extends Controller
      */
     public function all(Request $request)
     {
-        try {
-            // 1. Ambil semua kategori dari database
-            $categories = ProductCategory::all();
+        $categories = ProductCategory::all();
 
-            // 2. PENTING: Ubah path ikon menjadi URL lengkap
-            $categories->transform(function ($category) {
-                if ($category->icon_url) {
-                    // Fungsi url() akan menggunakan APP_URL dari file .env Anda
-                    $category->icon_url = url('storage/' . $category->icon_url);
-                }
-                return $category;
-            });
+        // Ubah kedua path menjadi URL lengkap
+        $categories->transform(function ($category) {
+            if ($category->icon_url) {
+                $category->icon_url = url('storage/' . $category->icon_url);
+            }
+            if ($category->image_url) {
+                $category->image_url = url('storage/' . $category->image_url);
+            }
+            return $category;
+        });
 
-            // 3. Kembalikan data dalam format yang sederhana
-            return ResponseFormatter::success(
-                $categories,
-                'Data list kategori produk berhasil diambil'
-            );
-
-        } catch (\Exception $e) {
-            return ResponseFormatter::error(
-                null,
-                'Gagal mengambil data kategori: ' . $e->getMessage(),
-                500
-            );
-        }
+        return ResponseFormatter::success(
+            $categories,
+            'Data list kategori produk berhasil diambil'
+        );
     }
+
 }
