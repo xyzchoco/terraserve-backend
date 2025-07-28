@@ -12,58 +12,70 @@ class ProductController extends Controller
     public function all(Request $request)
     {
         $id = $request->input('id');
-        $limit = $request->input('limit');
-        $name = $request->input('id');
+        $limit = $request->input('limit', 10);
+        $name = $request->input('name');
         $description = $request->input('description');
         $tags = $request->input('tags');
-        $categories = $request->input('id');
-
+        $categories = $request->input('categories_id');
         $price_from = $request->input('price_from');
         $price_to = $request->input('price_to');
 
-        if($id)
-        {
-            $product = Product::with(['category', 'galleries'])->find($id);
+        if ($id) {
+            $product = Product::with(['category', 'galleries', 'user'])->find($id);
 
-            if($product) {
-                return ResponseFormatter::success(
-                    $product,
-                    'data produk berhasil diambil'
-                );
-            }
-            else{
-                return ResponseFormatter::error(
-                    null,
-                    'data produk Tidak ada',
-                    404
-                );
+            if ($product) {
+                // Panggil fungsi transform untuk memperbaiki URL
+                $this->transformProductUrls($product);
+                return ResponseFormatter::success($product, 'Data produk berhasil diambil');
+            } else {
+                return ResponseFormatter::error(null, 'Data produk tidak ada', 404);
             }
         }
 
-        $product = Product::with(['category', 'galleries']);
+        $productQuery = Product::with(['category', 'galleries', 'user']);
 
-        if($name){
-            $product->where('name', 'like', '%' . $name . '%');
-        }
-        if($description){
-            $product->where('description', 'like', '%' . $description . '%');
-        }
-        if($tags){
-            $product->where('tags', 'like', '%' . $tags . '%');
-        }
-        if($price_from){
-            $product->where('price', '>=', $price_from);
-        }
-        if($price_to){
-            $product->where('price', '<=', $price_to);
-        }
-        if($categories){
-            $product->where('categories', $categories);
-        }
+        if ($name) $productQuery->where('name', 'like', '%' . $name . '%');
+        if ($description) $productQuery->where('description', 'like', '%' . $description . '%');
+        if ($tags) $productQuery->where('tags', 'like', '%' . $tags . '%');
+        if ($price_from) $productQuery->where('price', '>=', $price_from);
+        if ($price_to) $productQuery->where('price', '<=', $price_to);
+        if ($categories) $productQuery->where('categories_id', $categories);
+
+        $products = $productQuery->paginate($limit);
+
+        // Panggil fungsi transform untuk setiap produk dalam koleksi
+        $products->getCollection()->transform(function ($product) {
+            return $this->transformProductUrls($product);
+        });
 
         return ResponseFormatter::success(
-            $product->paginate($limit),
-            'data produk berhasil diambil',
-        );        
+            $products,
+            'Data list produk berhasil diambil'
+        );
+    }
+
+    /**
+     * Helper function to transform image paths to full URLs for a product.
+     *
+     * @param Product $product
+     * @return Product
+     */
+    private function transformProductUrls(Product $product): Product
+    {
+        // Perbaiki URL galeri
+        $product->galleries->transform(function ($gallery) {
+            // Cek jika URL sudah merupakan URL lengkap, jangan diubah
+            if ($gallery->url && !filter_var($gallery->url, FILTER_VALIDATE_URL)) {
+                $gallery->url = url('storage/' . $gallery->url);
+            }
+            return $gallery;
+        });
+
+        // Perbaiki URL ikon kategori
+        if ($product->category && $product->category->icon_url && !filter_var($product->category->icon_url, FILTER_VALIDATE_URL)) {
+            $product->category->icon_url = url('storage/' . $product->category->icon_url);
+        }
+
+        return $product;
     }
 }

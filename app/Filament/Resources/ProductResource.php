@@ -11,6 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class ProductResource extends Resource
 {
@@ -89,7 +90,11 @@ class ProductResource extends Resource
         return [
             RelationManagers\GalleriesRelationManager::class,
         ];
-    }
+    } 
+
+    protected $casts = [
+        'tags' => 'array',
+    ];
 
     public static function getPages(): array
     {
