@@ -20,16 +20,16 @@ class ProductCategory extends Model
 
     protected $table = 'product_categories';
 
-   protected $fillable = [
+    protected $fillable = [
         'name',
         'icon_url',
-        'image_url', // <-- Tambahkan ini
+        'image_url',
     ];
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'price', 'stok']) // Hanya catat perubahan pada kolom ini
+            ->logOnly(['name', 'icon_url', 'image_url']) // Hanya catat perubahan pada kolom ini
             ->setDescriptionForEvent(fn(string $eventName) => "Produk ini telah di-{$eventName}")
             ->useLogName('Product');
     }

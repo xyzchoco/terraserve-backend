@@ -106,30 +106,32 @@ class UserController extends Controller
     }
 
     public function updateProfile(Request $request)
-{
-    $user = Auth::user();
+    {
+        $user = Auth::user();
 
-    $request->validate([
-        'name' => ['sometimes', 'string', 'max:255'],
-        'username' => ['sometimes', 'string', 'max:255', 'unique:users,username,' . $user->id],
-        'email' => ['sometimes', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
-        'phone' => ['nullable', 'string', 'max:20'],
-        'password' => ['nullable', 'string', new Password],
-    ]);
+        $request->validate([
+            'name' => ['sometimes', 'string', 'max:255'],
+            'username' => ['sometimes', 'string', 'max:255', 'unique:users,username,' . $user->id],
+            'email' => ['sometimes', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'password' => ['nullable', 'string', new Password],
+            'gender' => 'nullable|in:Laki-laki,Perempuan',
+            'birthdate' => 'nullable|date',
+        ]);
 
-    $data = $request->all();
+        $data = $request->all();
 
-    // Jika password diisi, hash dulu
-    if (isset($data['password'])) {
-        $data['password'] = Hash::make($data['password']);
-    } else {
-        unset($data['password']); // Jangan update password kalau kosong
+        // Jika password diisi, hash dulu
+        if (isset($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        } else {
+            unset($data['password']); // Jangan update password kalau kosong
+        }
+
+        $user->update($data);
+
+        return ResponseFormatter::success($user, 'Profile Updated');
     }
-
-    $user->update($data);
-
-    return ResponseFormatter::success($user, 'Profile Updated');
-}
 
 }
 

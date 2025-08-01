@@ -76,6 +76,13 @@ class UserResource extends Resource
                     ->label('Telepon')
                     ->searchable(),
 
+                Tables\Columns\TextColumn::make('gender')
+                    ->label('Jenis Kelamin')
+                    ->sortable()
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('created_at')->dateTime('d M Y'),
+
                 Tables\Columns\BadgeColumn::make('roles')
                     ->label('Peran'),
             ])

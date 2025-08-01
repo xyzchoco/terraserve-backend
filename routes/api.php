@@ -9,6 +9,7 @@ use App\Http\Controllers\API\CategoryBannerController;
 use App\Http\Controllers\API\ForgotPasswordController;
 use App\Http\Controllers\API\DashboardBannerController;
 use App\Http\Controllers\API\ProductCategoryController;
+use App\Http\Controllers\API\FarmerApplicationController;
 
 Route::get('products', [ProductController::class, 'all']);
 Route::get('categories', [ProductCategoryController::class, 'all']);
@@ -27,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function (){
     Route::get('user', [UserController::class, 'fetch']);
     Route::post('user', [UserController::class, 'updateProfile']);
     Route::post('logout', [UserController::class, 'logout']);
+    Route::post('farmer-applications', [FarmerApplicationController::class, 'register']);
     
     Route::get('transaction',[ TransactionController::class, 'all']);
     Route::post('checkout',[ TransactionController::class, 'checkout']);

@@ -13,6 +13,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
         "livewire/livewire": "^3.0",
+        "mallardduck/blade-lucide-icons": "*",
         "spatie/laravel-activitylog": "^4.10",
         "yajra/laravel-datatables": "^12"
     },
