@@ -5,7 +5,7 @@ Backend API Laravel 12.
 ---
 
 ## 🔧 Requirements
-- PHP >= 8.4
+- PHP >= 8.3
 - Composer
 - MySQL / MariaDB
 - Node.js + npm
