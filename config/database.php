@@ -57,7 +57,7 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('DB_SSL_CA', '/etc/ssl/certs/BaltimoreCyberTrustRoot.crt.pem'),
+            PDO::MYSQL_ATTR_SSL_CA => base_path('storage/certs/DigiCertGlobalRootG2.crt.pem'),
             ]) : [],
         ],
 
