@@ -13,16 +13,16 @@ return new class extends Migration
     {
         Schema::table('farmer_applications', function (Blueprint $table) {
             // Langkah 1: Hapus foreign key constraint terlebih dahulu
-            $table->dropForeign(['product_category_id']);
+            // $table->dropForeign(['product_category_id']);
 
             // Langkah 2: Baru hapus kolom-kolomnya
             $table->dropColumn([
-                'initial_product_name',
-                'product_category_id',
-                'price',
-                'stock',
-                'description',
-                'product_photo_path',
+                //'initial_product_name',
+                //'product_category_id',
+                //'price',
+                //'stock',
+                //'description',
+                //'product_photo_path',
             ]);
         });
     }

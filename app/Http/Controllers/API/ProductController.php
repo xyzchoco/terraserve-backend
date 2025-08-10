@@ -12,7 +12,8 @@ class ProductController extends Controller
     public function all(Request $request)
     {
         $id = $request->input('id');
-        $limit = $request->input('limit', 10);
+        // Kita tidak lagi memerlukan $limit karena akan mengambil semua data
+        // $limit = $request->input('limit', 10); 
         $name = $request->input('name');
         $description = $request->input('description');
         $tags = $request->input('tags');
@@ -41,10 +42,11 @@ class ProductController extends Controller
         if ($price_to) $productQuery->where('price', '<=', $price_to);
         if ($categories) $productQuery->where('categories_id', $categories);
 
-        $products = $productQuery->paginate($limit);
+        // ✅ PERUBAHAN 1: Ganti .paginate() dengan .get() untuk mengambil semua produk
+        $products = $productQuery->get();
 
-        // Panggil fungsi transform untuk setiap produk dalam koleksi
-        $products->getCollection()->transform(function ($product) {
+        // ✅ PERUBAHAN 2: Hapus .getCollection() karena hasil dari .get() sudah merupakan Collection
+        $products->transform(function ($product) {
             return $this->transformProductUrls($product);
         });
 
