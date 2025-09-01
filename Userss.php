@@ -3,21 +3,25 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Filament\Models\Contracts\FilamentUser;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Activitylog\LogOptions;
+use Laravel\Jetstream\HasProfilePhoto;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Log;
-use Laravel\Fortify\TwoFactorAuthenticatable;
-use Laravel\Jetstream\HasProfilePhoto;
-use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, HasProfilePhoto, SoftDeletes, TwoFactorAuthenticatable, LogsActivity;
+
+    /** @use HasFactory<\Database\Factories\UserFactory> */
+    use HasFactory;
+    use HasProfilePhoto;
+    use Notifiable;
+    use TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -47,6 +51,11 @@ class User extends Authenticatable implements FilamentUser
         'two_factor_secret',
     ];
 
+    public function canAccessFilament(): bool
+    {
+        return $this->roles === 'ADMIN';
+    }
+
     /**
      * The accessors to append to the model's array form.
      *
@@ -69,25 +78,10 @@ class User extends Authenticatable implements FilamentUser
         ];
     }
 
-    /**
-     * Method otorisasi yang diwajibkan oleh contract FilamentUser.
-     */
-    public function canAccessPanel(\Filament\Panel $panel): bool
-    {
-        // Menambahkan log untuk debugging.
-        Log::info('Mengecek akses Panel Filament untuk user: ' . $this->email . ' | Roles: "' . $this->roles . '"');
-
-        // Logika pengecekan yang aman.
-        // trim() untuk menghapus spasi di awal/akhir.
-        // strtoupper() untuk mengubah semuanya menjadi huruf besar sebelum dibandingkan.
-        return strtoupper(trim($this->roles)) === 'ADMIN';
-    }
-
     public function getActivitylogOptions(): LogOptions
     {
-        // CATATAN: Logika ini sepertinya salah tempat dan seharusnya ada di model Product.
         return LogOptions::defaults()
-            ->logOnly(['name', 'price', 'stok'])
+            ->logOnly(['name', 'price', 'stok']) // Hanya catat perubahan pada kolom ini
             ->setDescriptionForEvent(fn(string $eventName) => "Produk ini telah di-{$eventName}")
             ->useLogName('Product');
     }
@@ -102,4 +96,3 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(Product::class, 'user_id', 'id');
     }
 }
-
