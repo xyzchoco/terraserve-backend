@@ -51,6 +51,11 @@ class User extends Authenticatable
         'two_factor_secret',
     ];
 
+    public function canAccessFilament(): bool
+    {
+        return $this->roles === 'ADMIN';
+    }
+
     /**
      * The accessors to append to the model's array form.
      *
