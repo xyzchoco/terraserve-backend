@@ -23,7 +23,7 @@ RUN apt-get update && apt-get install -y \
 
 # Install ekstensi tambahan yang sering dipakai Laravel + Filament
 RUN pecl install redis && docker-php-ext-enable redis
-RUN pecl install sodium && docker-php-ext-enable sodium
+RUN docker-php-ext-install sodium
 
 # Copy composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
