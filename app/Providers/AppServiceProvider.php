@@ -3,6 +3,10 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+
+// 'Gate' dan 'User' tidak lagi diperlukan karena logikanya sudah dipindahkan
+// ke User Model dengan method canAccessFilament() untuk Filament v2.
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -18,14 +22,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // TAMBAHKAN KODE GATE DI SINI
-        Gate::define('view-admin', function (User $user) {
-            // Ganti logika ini sesuai kebutuhan Anda.
-            // Contoh: Hanya user dengan role 'admin' yang bisa akses
-            return $user->role === 'admin';
-            
-            // Contoh lain: Berdasarkan email
-            // return $user->email === 'admin@example.com';
-        });
+        // Method ini sengaja dikosongkan dari Gate::define()
+        // karena Filament v2 tidak menggunakannya.
     }
 }
+
