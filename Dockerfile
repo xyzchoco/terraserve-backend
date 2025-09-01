@@ -1,47 +1,53 @@
-# Gunakan PHP 8.2 FPM dengan ekstensi dasar
-FROM php:8.2-fpm
+# Gunakan base image PHP + Apache
+FROM php:8.2-apache
 
-# Install dependencies system
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
-    libzip-dev \
-    libicu-dev \
-    libonig-dev \
-    libxml2-dev \
+    curl \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
-    && docker-php-ext-install \
-    pdo_mysql \
+    libzip-dev \
+    libonig-dev \
+    libxml2-dev \
+    libsodium-dev \
     zip \
-    intl \
-    bcmath \
-    gd \
-    opcache \
-    sockets
+    && rm -rf /var/lib/apt/lists/*
 
-# Install ekstensi tambahan yang sering dipakai Laravel + Filament
-RUN pecl install redis && docker-php-ext-enable redis
-RUN docker-php-ext-install sodium
+# Konfigurasi dan install ekstensi PHP
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install \
+        pdo_mysql \
+        mbstring \
+        exif \
+        pcntl \
+        bcmath \
+        gd \
+        zip \
+        sodium \
+        intl \
+        xml
 
-# Copy composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+# Aktifkan Apache mod_rewrite (dibutuhkan Laravel untuk routing)
+RUN a2enmod rewrite
 
 # Set working directory
-WORKDIR /var/www
+WORKDIR /var/www/html
 
-# Copy project files
+# Copy composer dari official image
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Copy semua file project ke dalam container
 COPY . .
 
-# Install dependencies Laravel
-RUN composer install --no-dev --optimize-autoloader
+# Set permission storage dan bootstrap agar bisa ditulis Laravel
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
 
-# Set permission untuk storage & bootstrap
-RUN chmod -R 777 storage bootstrap/cache
+# Expose port
+EXPOSE 8080
 
-# Expose port 8000 untuk Railway
-EXPOSE 8000
-
-# Jalankan Laravel dengan PHP artisan serve
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000
+# Jalankan Apache di port 8080 (Railway default pakai $PORT)
+CMD ["apache2-foreground"]
